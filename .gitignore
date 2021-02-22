@@ -14,12 +14,13 @@
 !/packages/*/lib/*/*.dll
 # Include dlls if they're in the CommonReferences directory
 !*CommonReferences/*.dll
+
 ####################
 # VS Upgrade stuff #
 ####################
 UpgradeLog.XML
 _UpgradeReport_Files/
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
