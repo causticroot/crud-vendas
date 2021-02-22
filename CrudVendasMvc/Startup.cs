@@ -32,7 +32,8 @@ namespace CrudVendasMvc
             var conexao = Configuration["ConnectionStrings:CrudVendasMvcContext"];
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddDbContext<CrudVendasMvcContext>(options =>
-                options.UseMySql(conexao));
+                options.UseMySql(conexao, builder =>
+                    builder.MigrationsAssembly("CrudVendasMvc")));
             
             services.AddControllersWithViews();
             
