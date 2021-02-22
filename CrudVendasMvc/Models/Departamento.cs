@@ -16,11 +16,10 @@ namespace CrudVendasMvc.Models
         {
 
         }
-        public Departamento(int id, string nome, ICollection<Vendedor> vendedores)
+        public Departamento(int id, string nome)
         {
             Id = id;
             Nome = nome;
-            Vendedores = vendedores;
         }
 
         // Comportamentos
