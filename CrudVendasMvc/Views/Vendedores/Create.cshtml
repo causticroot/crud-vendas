@@ -1,12 +1,11 @@
 @model CrudVendasMvc.Models.Vendedor
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar";
 }
 
-<h1>Create</h1>
+<h1>Cadastrar vendedor:</h1>
 
-<h4>Vendedor</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -33,6 +32,9 @@
                 <span asp-validation-for="Salario" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label afor=""></label>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
@@ -40,6 +42,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Voltar para a lista</a>
 </div>
 
