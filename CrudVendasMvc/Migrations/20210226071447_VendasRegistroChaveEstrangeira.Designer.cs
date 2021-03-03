@@ -3,14 +3,16 @@ using System;
 using CrudVendasMvc.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CrudVendasMvc.Migrations
 {
     [DbContext(typeof(CrudVendasMvcContext))]
-    partial class CrudVendasMvcContextModelSnapshot : ModelSnapshot
+    [Migration("20210226071447_VendasRegistroChaveEstrangeira")]
+    partial class VendasRegistroChaveEstrangeira
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

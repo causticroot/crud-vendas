@@ -3,14 +3,16 @@ using System;
 using CrudVendasMvc.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CrudVendasMvc.Migrations
 {
     [DbContext(typeof(CrudVendasMvcContext))]
-    partial class CrudVendasMvcContextModelSnapshot : ModelSnapshot
+    [Migration("20210225014830_DepartamentoChaveEstrangeira")]
+    partial class DepartamentoChaveEstrangeira
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +48,7 @@ namespace CrudVendasMvc.Migrations
                     b.Property<double>("Quantia")
                         .HasColumnType("double");
 
-                    b.Property<int>("VendedorId")
+                    b.Property<int?>("VendedorId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -69,13 +71,10 @@ namespace CrudVendasMvc.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("varchar(60) CHARACTER SET utf8mb4")
-                        .HasMaxLength(60);
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<double>("Salario")
                         .HasColumnType("double");
@@ -91,9 +90,7 @@ namespace CrudVendasMvc.Migrations
                 {
                     b.HasOne("CrudVendasMvc.Models.Vendedor", "Vendedor")
                         .WithMany("Vendas")
-                        .HasForeignKey("VendedorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("VendedorId");
                 });
 
             modelBuilder.Entity("CrudVendasMvc.Models.Vendedor", b =>
