@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,7 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using CrudVendasMvc.Services;
 using CrudVendasMvc.Models;
+using CrudVendasMvc.Data;
 
 
 namespace CrudVendasMvc
@@ -36,16 +39,30 @@ namespace CrudVendasMvc
                     builder.MigrationsAssembly("CrudVendasMvc")));
             
             services.AddControllersWithViews();
+            services.AddScoped<SeedingService>();//TODO: Remover
+            services.AddScoped<VendedorService>();
+            services.AddScoped<VendasRegistroService>();
+            services.AddScoped<DepartamentoService>();
             
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SeedingService seedingService)//TODO: Remover
         {
+            //Definindo localização
+            var enUS = new CultureInfo("en-US");
+            var localizationOption = new  RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(enUS),
+                SupportedCultures = new List<CultureInfo> { enUS },
+                SupportedUICultures = new List<CultureInfo> { enUS }
+            };
+            app.UseRequestLocalization(localizationOption);
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                seedingService.Seed();//TODO: Remover
             }
             else
             {

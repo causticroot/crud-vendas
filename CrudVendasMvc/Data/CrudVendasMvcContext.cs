@@ -9,7 +9,7 @@ namespace CrudVendasMvc.Models
 {
     public class CrudVendasMvcContext : DbContext
     {
-        //Atributo
+        // Propriedades
         public DbSet<Departamento> Departamento { get; set; }
         public DbSet<Vendedor> Vendedor { get; set; }
         public DbSet<VendasRegistro> VendasRegistro { get; set; }
