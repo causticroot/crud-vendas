@@ -1,4 +1,6 @@
 using System;
+using System.Data;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,147 +8,195 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CrudVendasMvc.Models;
+using CrudVendasMvc.Models.Enums;
+using CrudVendasMvc.Models.ViewModels;
+using CrudVendasMvc.Services;
+using CrudVendasMvc.Services.Exceptions;
 
 namespace CrudVendasMvc.Controllers
 {
     public class VendasRegistrosController : Controller
     {
-        private readonly CrudVendasMvcContext _context;
+        private readonly VendasRegistroService _vendasRegistroService;
+        private readonly VendedorService _vendedorService;
+        
 
-        public VendasRegistrosController(CrudVendasMvcContext context)
+        public VendasRegistrosController(VendasRegistroService vendasRegistroService, VendedorService vendedorService)
         {
-            _context = context;
+            _vendasRegistroService = vendasRegistroService;
+            _vendedorService = vendedorService;
         }
 
-        // GET: VendasRegistros
         public async Task<IActionResult> Index()
         {
-            return View(await _context.VendasRegistro.ToListAsync());
+            var lista = await _vendasRegistroService.EncontrarTodosAsync();
+            return View(lista);
         }
 
-        // GET: VendasRegistros/Details/5
+
+        public async Task<IActionResult> PesquisaSimplesAsync(DateTime? dataMin, DateTime? dataMax)
+        {
+            if (!dataMin.HasValue)
+            {
+                dataMin = new DateTime(DateTime.Now.Year, 1, 1);
+            }
+            if (!dataMax.HasValue)
+            {
+                dataMax = DateTime.Now;
+            }
+            //Saída da data
+            ViewData["dataMin"] = dataMin.Value.ToString("dd-MM-yyyy");
+            ViewData["dataMax"] = dataMax.Value.ToString("dd-MM-yyyy");
+
+            var resultado = await _vendasRegistroService.EncontrarPorDataAsync(dataMin, dataMax);
+            
+            return View(resultado);
+        }
+
+
+        //GET: CREATE
+        public async Task<IActionResult> Create()
+        {
+            var listaVendedores = await _vendedorService.EncontrarTodosAsync();
+            var listaEstados = Enum.GetValues(typeof(VendaEstado)).Cast<VendaEstado>().ToList();
+            var viewModel = new VendasRegistroViewModel { Vendedores = listaVendedores, Estados = listaEstados };
+            return View(viewModel);
+        }
+        
+        //POST: CREATE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(VendasRegistro vendasRegistro)
+        {
+            //Teste de validação
+            if (!ModelState.IsValid)
+            {
+                var listaVendedores = await _vendedorService.EncontrarTodosAsync();
+                var listaEstados = Enum.GetValues(typeof(VendaEstado)).Cast<VendaEstado>().ToList();
+                var viewModel = new VendasRegistroViewModel { Vendedores = listaVendedores, Estados = listaEstados }; //TODO: Rever
+                return View(viewModel);
+            }
+
+            await _vendasRegistroService.InserirAsync(vendasRegistro);
+            return RedirectToAction(nameof(Index));   
+        }
+        
+        
+        //GET: DETAILS
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido."});
             }
+            
+            var venda = await _vendasRegistroService.EncontrarPorIdAsync(id.Value);
 
-            var vendasRegistro = await _context.VendasRegistro
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vendasRegistro == null)
+            if (venda == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado."});
             }
 
-            return View(vendasRegistro);
+            return View(venda);
         }
-
-        // GET: VendasRegistros/Create
-        public IActionResult Create()
+        
+        //GET: DELETE
+        public async Task<IActionResult> Delete(int? id)
         {
-            return View();
-        }
+            if(id == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido"});
+            }
 
-        // POST: VendasRegistros/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+            var venda = await _vendasRegistroService.EncontrarPorIdAsync(id.Value);
+
+            if (venda == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = " Id não encontrado"});
+            }
+
+            return View(venda);        
+        }
+        
+        //POST: DELETE
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Data,Quantia,Estado")] VendasRegistro vendasRegistro)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(vendasRegistro);
-                await _context.SaveChangesAsync();
+                await _vendasRegistroService.RemoverAsync(id);
                 return RedirectToAction(nameof(Index));
             }
-            return View(vendasRegistro);
+            catch (IntegrityException ex)
+            {
+                return RedirectToAction(nameof(Error), new { Message = ex.Message});
+            }
         }
-
-        // GET: VendasRegistros/Edit/5
+        
+        //GET: EDIT
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido."});
             }
 
-            var vendasRegistro = await _context.VendasRegistro.FindAsync(id);
-            if (vendasRegistro == null)
+            var venda = await _vendasRegistroService.EncontrarPorIdAsync(id.Value);
+
+            if (venda == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado."});    
             }
-            return View(vendasRegistro);
-        }
 
-        // POST: VendasRegistros/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+            var listaVendedores = await _vendedorService.EncontrarTodosAsync();
+            var listaEstados = Enum.GetValues(typeof(VendaEstado)).Cast<VendaEstado>().ToList();
+            var viewModel = new VendasRegistroViewModel{ VendasRegistro = venda, Estados = listaEstados, Vendedores = listaVendedores};
+            
+            return View(viewModel);
+        } 
+        
+        //POST: EDIT
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Data,Quantia,Estado")] VendasRegistro vendasRegistro)
+        //EU TENHO QUE LEMBRAR DE SER MENOS RETARDADO E PASSAR O ARGUMENTO COM O MESMO NOME DO OBJETO
+        //ISSO ME FODEU E ME CUSTOU HORAS TENTANDO RESOLVER UM DEFEITO QUE NÃO EXISTIA
+        public async Task<IActionResult> Edit(int id, VendasRegistro vendasRegistro)
         {
+            if (!ModelState.IsValid)
+            {
+                var listaVendedores = await _vendedorService.EncontrarTodosAsync();
+                var listaEstados = Enum.GetValues(typeof(VendaEstado)).Cast<VendaEstado>().ToList();
+                var viewModel = new VendasRegistroViewModel{ VendasRegistro = vendasRegistro, Estados = listaEstados, Vendedores = listaVendedores};
+                return View(viewModel);
+            }
+
             if (id != vendasRegistro.Id)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não correspondente."});
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(vendasRegistro);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VendasRegistroExists(vendasRegistro.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _vendasRegistroService.AtualizarAsync(vendasRegistro);
                 return RedirectToAction(nameof(Index));
             }
-            return View(vendasRegistro);
-        }
-
-        // GET: VendasRegistros/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+            catch (ApplicationException ex)
             {
-                return NotFound();
+                 return RedirectToAction(nameof(Error), new { Message = ex.Message});
             }
+        }
 
-            var vendasRegistro = await _context.VendasRegistro
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vendasRegistro == null)
+        //Error
+        public IActionResult Error(String message)
+        {
+            var viewModel = new ErrorViewModel
             {
-                return NotFound();
-            }
-
-            return View(vendasRegistro);
-        }
-
-        // POST: VendasRegistros/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var vendasRegistro = await _context.VendasRegistro.FindAsync(id);
-            _context.VendasRegistro.Remove(vendasRegistro);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool VendasRegistroExists(int id)
-        {
-            return _context.VendasRegistro.Any(e => e.Id == id);
+                Message = message,
+                //Pegando Id internet da request
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+            return View(viewModel);
         }
     }
 }

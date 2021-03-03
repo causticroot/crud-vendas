@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,148 +7,169 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using CrudVendasMvc.Services;
+using CrudVendasMvc.Services.Exceptions;
 using CrudVendasMvc.Models;
+using CrudVendasMvc.Models.ViewModels;
 
 namespace CrudVendasMvc.Controllers
 {
     public class VendedoresController : Controller
     {
-        private readonly CrudVendasMvcContext _context;
+        
+        private readonly VendedorService _vendedorService;
+        private readonly DepartamentoService _departamentoService;
 
-        public VendedoresController(CrudVendasMvcContext context)
+        public VendedoresController(VendedorService vendedorService, DepartamentoService departamentoService)
         {
-            _context = context;
+            _vendedorService = vendedorService;
+            _departamentoService = departamentoService;
         }
 
-        // GET: Vendedores
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Vendedor.ToListAsync());
+            var lista = await _vendedorService.EncontrarTodosAsync();
+            return View(lista);
         }
 
-        // GET: Vendedores/Details/5
-        public async Task<IActionResult> Details(int? id)
+        //GET: CREATE
+        public async Task<IActionResult> Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var vendedor = await _context.Vendedor
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (vendedor == null)
-            {
-                return NotFound();
-            }
-
-            return View(vendedor);
+            var listaDepartamentos = await _departamentoService.EncontrarTodosAsync();
+            var ViewModel = new VendedorViewModel { Departamentos = listaDepartamentos };
+            return View(ViewModel);
         }
-
-        // GET: Vendedores/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Vendedores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
+        //POST: CREATE
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Email,DataNascimento,Salario")] Vendedor vendedor)
+        public async Task<IActionResult> Create(Vendedor vendedor)
         {
-            if (ModelState.IsValid)
+            //Teste de validação
+            if (!ModelState.IsValid)
             {
-                _context.Add(vendedor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var listaDepartamentos = await _departamentoService.EncontrarTodosAsync();
+                var viewModel =  new VendedorViewModel{ Vendedor = vendedor, Departamentos = listaDepartamentos};
+                return View(viewModel);
             }
-            return View(vendedor);
+
+            await _vendedorService.InserirAsync(vendedor);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Vendedores/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var vendedor = await _context.Vendedor.FindAsync(id);
-            if (vendedor == null)
-            {
-                return NotFound();
-            }
-            return View(vendedor);
-        }
-
-        // POST: Vendedores/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,DataNascimento,Salario")] Vendedor vendedor)
-        {
-            if (id != vendedor.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(vendedor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VendedorExists(vendedor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(vendedor);
-        }
-
-        // GET: Vendedores/Delete/5
+        //GET: DELETE
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido."});
             }
 
-            var vendedor = await _context.Vendedor
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var vendedor = await _vendedorService.EncontrarPorIdAsync(id.Value);
+
             if (vendedor == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado."});
+            }
+            
+            return View(vendedor);
+        }
+
+        //POST: DELETE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                await _vendedorService.RemoverAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException ex)
+            {
+                 return RedirectToAction(nameof(Error), new { Message = ex.Message});
+            }
+        }
+
+        //GET: DETAILS
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido."});
+            }
+
+            var vendedor = await  _vendedorService.EncontrarPorIdAsync(id.Value);
+
+            if (vendedor == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado."});
             }
 
             return View(vendedor);
         }
 
-        // POST: Vendedores/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        //GET: EDIT
+        public async Task<IActionResult> Edit(int? id)
         {
-            var vendedor = await _context.Vendedor.FindAsync(id);
-            _context.Vendedor.Remove(vendedor);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (id == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não fornecido."});
+            }
+
+            var vendedor = await _vendedorService.EncontrarPorIdAsync(id.Value);
+
+            if (vendedor == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado."});
+            }
+
+            // List<Departamento> listaDepartamentos = await _departamentoService.EncontrarTodosAsync();
+            // VendedorViewModel viewModel = new VendedorViewModel{ Vendedor = vendedor, Departamentos = listaDepartamentos};
+            var listaDepartamentos = await _departamentoService.EncontrarTodosAsync();
+            var viewModel = new VendedorViewModel{ Vendedor = vendedor, Departamentos = listaDepartamentos};
+            return View(viewModel);
         }
 
-        private bool VendedorExists(int id)
+        //POST: EDIT
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Vendedor vendedor)
         {
-            return _context.Vendedor.Any(e => e.Id == id);
+            if (!ModelState.IsValid)
+            {
+                var listaDepartamentos = await _departamentoService.EncontrarTodosAsync();
+                var viewModel =  new VendedorViewModel{ Vendedor = vendedor, Departamentos = listaDepartamentos};
+                return View(viewModel);
+            }
+
+            // O id não pode ser diferente do Id do URL da request
+            if ( id != vendedor.Id)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id não correspondente."});
+            }
+
+            try
+            {
+                await _vendedorService.AtualizarAsync(vendedor);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ApplicationException ex)
+            {
+                return RedirectToAction(nameof(Error), new { message = ex.Message});
+            }
         }
+
+        public IActionResult Error(String message)
+        {
+            var viewModel = new ErrorViewModel
+            {
+                Message = message,
+                //Pegando Id internet da request
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+            return View(viewModel);
+        }
+        
     }
 }
