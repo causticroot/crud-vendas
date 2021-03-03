@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace CrudVendasMvc.Models
@@ -8,7 +9,11 @@ namespace CrudVendasMvc.Models
     {
         // Propriedades
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "{0} requerido")]
+        [StringLength(60, MinimumLength = 4, ErrorMessage = "O tamanho do {0} deve está entre {2} e {1}.")]
         public string Nome { get; set; }
+        
         public ICollection<Vendedor> Vendedores { get; set; } = new List<Vendedor>();
 
         // Construtores
@@ -20,16 +25,6 @@ namespace CrudVendasMvc.Models
         {
             Id = id;
             Nome = nome;
-        }
-
-        // Comportamentos
-        public void AddVendedor(Vendedor vendedor)
-        {
-            Vendedores.Add(vendedor);
-        }
-        public double TotalVendas(DateTime periodoInicial, DateTime periodoFinal)
-        {
-            return Vendedores.Sum(vendedor => vendedor.TotalVendas(periodoInicial, periodoFinal));
         }
     }
 }

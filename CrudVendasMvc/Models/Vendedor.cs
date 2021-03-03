@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace CrudVendasMvc.Models
 {
@@ -8,11 +9,35 @@ namespace CrudVendasMvc.Models
     {
         // Propriedades
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "{0} requerido.")]
+        [StringLength(60, MinimumLength = 4, ErrorMessage = "O tamanho do {0} deve está entre {2} e {1}.")]
         public string Nome { get; set; }
+        
+        
+        [Required(ErrorMessage = "{0} requerido.")]
+        [EmailAddress(ErrorMessage = "Insira um {0} válido.")]
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+        
+        
+        [Required(ErrorMessage = "{0} requerido.")]
+        [Display(Name = "Data de nascimento")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        [DataType(DataType.Date)]
         public DateTime DataNascimento { get; set; }
+        
+        
+        [Required(ErrorMessage = "{0} requerido.")]
+        [Range(500.0, 20000.0, ErrorMessage = "O valor de {0} deve estar entre {1} e {2}.")]
+        [DisplayFormat(DataFormatString = "R$ {0:F2}")]
         public double Salario { get; set; }
+        
+        
         public Departamento Departamento { get; set; }
+        
+        [Display(Name = "Departamento")]
+        public int DepartamentoId { get; set; } // Referencial de intregridaade
         public ICollection<VendasRegistro> Vendas { get; set; } = new List<VendasRegistro>();
 
         // Construtores
@@ -29,23 +54,5 @@ namespace CrudVendasMvc.Models
             Salario = salario;
             Departamento = departamento;
         }
-
-
-        // Comportamentos
-        public void AddVenda(VendasRegistro vr)
-        {
-            Vendas.Add(vr);
-        }
-        public void RemoveVenda(VendasRegistro vr)
-        {
-            Vendas.Remove(vr);
-        }
-        public double TotalVendas(DateTime periodoInicial, DateTime periodoFinal)
-        {
-            //Operação where filtra a pesquisa da lista -^
-            return Vendas.Where(vr => vr.Data >= periodoInicial && vr.Data <= periodoFinal).Sum(vr => vr.Quantia);
-        }
-
-
     }
 }
