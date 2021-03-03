@@ -1,40 +1,44 @@
-@model CrudVendasMvc.Models.VendasRegistro
+@model CrudVendasMvc.Models.ViewModels.VendasRegistroViewModel
 
 @{
     ViewData["Title"] = "Editar";
 }
 
-<h1>Editar um registro de venda:</h1>
+<h1>Editar um registro de venda</h1>
 
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="VendasRegistro.Id"><!-- sem isso o response n funfa -->
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Data" class="control-label"></label>
-                <input asp-for="Data" class="form-control" />
-                <span asp-validation-for="Data" class="text-danger"></span>
+                <label asp-for="VendasRegistro.Data" class="control-label"></label>
+                <input asp-for="VendasRegistro.Data" class="form-control" />
+                <span asp-validation-for="VendasRegistro.Data" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Quantia" class="control-label"></label>
-                <input asp-for="Quantia" class="form-control" />
-                <span asp-validation-for="Quantia" class="text-danger"></span>
+                <label asp-for="VendasRegistro.Quantia" class="control-label"></label>
+                <input asp-for="VendasRegistro.Quantia" class="form-control" />
+                <span asp-validation-for="VendasRegistro.Quantia" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <select asp-for="Estado" class="form-control"></select>
-                <span asp-validation-for="Estado" class="text-danger"></span>
+                <label asp-for="VendasRegistro.VendedorId" class="control-label"></label>
+                <select asp-for="VendasRegistro.VendedorId" asp-items="@(new SelectList(Model.Vendedores, "Id", "Nome"))" class="form-control"></select>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <label asp-for="VendasRegistro.Estado" class="control-label"></label>
+                <select asp-for="VendasRegistro.Estado" asp-items="@(new SelectList(Model.Estados))" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Salvar" class="btn btn-primary m-3" /> | 
+                <a asp-action="Index">Voltar para a lista</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Voltar para a lista</a>
-</div>
-
+<!-- Cliente-side validation -->
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

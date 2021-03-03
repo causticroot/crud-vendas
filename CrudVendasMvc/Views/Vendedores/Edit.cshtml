@@ -1,46 +1,53 @@
-@model CrudVendasMvc.Models.Vendedor
+@model CrudVendasMvc.Models.ViewModels.VendedorViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar";
 }
 
-<h1>Edit</h1>
+<h1>Editar vendedor</h1>
 
-<h4>Vendedor</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Vendedor.Id"> <!-- sem isso o response nao funfa -->
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
+                <label asp-for="Vendedor.Nome" class="control-label"></label>
+                <input asp-for="Vendedor.Nome" class="form-control" />
+                <span asp-validation-for="Vendedor.Nome" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <label asp-for="Vendedor.Email" class="control-label"></label>
+                <input asp-for="Vendedor.Email" class="form-control" />
+                <span asp-validation-for="Vendedor.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DataNascimento" class="control-label"></label>
-                <input asp-for="DataNascimento" class="form-control" />
-                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+                <label asp-for="Vendedor.DataNascimento" class="control-label"></label>
+                <input asp-for="Vendedor.DataNascimento" class="form-control" />
+                <span asp-validation-for="Vendedor.DataNascimento" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Salario" class="control-label"></label>
-                <input asp-for="Salario" class="form-control" />
-                <span asp-validation-for="Salario" class="text-danger"></span>
+                <label asp-for="Vendedor.Salario" class="control-label"></label>
+                <input asp-for="Vendedor.Salario" class="form-control" />
+                <span asp-validation-for="Vendedor.Salario" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <label asp-for="Vendedor.DepartamentoId" class="control-label"></label>
+                <select asp-for="Vendedor.DepartamentoId" asp-items= "@(new SelectList(Model.Departamentos,"Id", "Nome"))" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label afor=""></label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Salvar" class="btn btn-primary" /> | 
+                <a asp-action="Index">Voltar para a lista</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+<!-- Cliente-side validation -->
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,74 @@
+@model IEnumerable<CrudVendasMvc.Models.VendasRegistro>;
+
+@{
+    ViewData["Title"] = "Pesquisa Simples";
+}
+
+<h2>Pesquisa simples</h2>
+<nav class="navbar navbar-default">
+    <div class="container-fluid bg-primary">
+        <form class="form-inline navbar-form navbar-left" role="search">
+            <div class="form-group">
+                <div class="form-group">
+                    <label for="dataMin">Data mínima</label>
+                    <input type="date" class="form-control m-2" name="dataMin" value=@ViewData["dataMin"] />
+                </div>
+                <div class="form-group">
+                    <label for="dataMax">Data maxíma</label>
+                    <input type="date" class="form-control m-2" name="dataMax" value=@ViewData["dataMax"] />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary m-2"> Pesquisar </button>
+        </form>
+    </div>
+</nav>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Total = @Model.Sum(obj => obj.Quantia).ToString("F2")</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Data)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Vendedor)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Vendedor.Departamento)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Estado)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Quantia)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Data)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Vendedor.Nome)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Vendedor.Departamento)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Estado)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Quantia)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

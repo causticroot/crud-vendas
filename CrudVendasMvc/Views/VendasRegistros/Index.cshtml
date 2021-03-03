@@ -4,12 +4,13 @@
     ViewData["Title"] = "Registros";
 }
 
-<h1>Registros de Vendas:</h1>
+<h1>Registros de vendas</h1>
 
 <p>
-    <a asp-action="Create">Registar nova venda</a>
+    <a asp-action="Create">Novo registro</a> |
+    <a asp-action="PesquisaSimples">Pesquisa simples</a>
 </p>
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
             <th>
@@ -20,6 +21,9 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Estado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vendedor)
             </th>
             <th></th>
         </tr>
@@ -35,6 +39,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Estado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vendedor.Nome)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
