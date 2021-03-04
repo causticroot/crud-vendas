@@ -32,11 +32,19 @@ namespace CrudVendasMvc
         public void ConfigureServices(IServiceCollection services)
         {
             // Conexao com o banco
-            var conexao = Configuration["ConnectionStrings:CrudVendasMvcContext"];
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            //var conexao = Configuration["ConnectionStrings:CrudVendasMvcContext"];
+            var host = Configuration["DBHOST"] ?? "localhost";
+            var port = Configuration["DBPORT"] ?? "3306";
+            var password = Configuration["DBPASSWORD"] ?? "pass@word123";
+
             services.AddDbContext<CrudVendasMvcContext>(options =>
-                options.UseMySql(conexao, builder =>
-                    builder.MigrationsAssembly("CrudVendasMvc")));
+                options.UseMySql($"server={host};userid=root;pwd={password};"
+                    + $"port={port};database=crudvendasmvcdb"));    
+
+            // services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            // services.AddDbContext<CrudVendasMvcContext>(options =>
+            //     options.UseMySql(conexao, builder =>
+            //         builder.MigrationsAssembly("CrudVendasMvc")));
             
             services.AddControllersWithViews();
             services.AddScoped<SeedingService>();//TODO: Remover
@@ -70,6 +78,8 @@ namespace CrudVendasMvc
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            seedingService.Seed();//TODO: Remover
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
