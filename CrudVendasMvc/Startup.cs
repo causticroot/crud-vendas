@@ -44,7 +44,6 @@ namespace CrudVendasMvc
             services.AddControllersWithViews();
             services.AddScoped<SeedingService>();//Popula o banco
             services.AddScoped<VendedorService>();
-            services.AddScoped<VendasRegistroService>();
             services.AddScoped<DepartamentoService>();
             
         }
