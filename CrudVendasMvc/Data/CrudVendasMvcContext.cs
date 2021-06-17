@@ -12,7 +12,6 @@ namespace CrudVendasMvc.Models
         // Propriedades
         public DbSet<Departamento> Departamento { get; set; }
         public DbSet<Vendedor> Vendedor { get; set; }
-        public DbSet<VendasRegistro> VendasRegistro { get; set; }
     
         //Construtor
         public CrudVendasMvcContext(DbContextOptions<CrudVendasMvcContext> options)
