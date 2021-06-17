@@ -42,7 +42,7 @@ namespace CrudVendasMvc
                     + $"port={port};database=crudvendasmvcdb"));    
 
             services.AddControllersWithViews();
-            services.AddScoped<SeedingService>();//TODO: Remover
+            services.AddScoped<SeedingService>();//Popula o banco
             services.AddScoped<VendedorService>();
             services.AddScoped<VendasRegistroService>();
             services.AddScoped<DepartamentoService>();
