@@ -41,11 +41,6 @@ namespace CrudVendasMvc
                 options.UseMySql($"server={host};userid=root;pwd={password};"
                     + $"port={port};database=crudvendasmvcdb"));    
 
-            // services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            // services.AddDbContext<CrudVendasMvcContext>(options =>
-            //     options.UseMySql(conexao, builder =>
-            //         builder.MigrationsAssembly("CrudVendasMvc")));
-            
             services.AddControllersWithViews();
             services.AddScoped<SeedingService>();//TODO: Remover
             services.AddScoped<VendedorService>();
